@@ -53,6 +53,7 @@ class Showcase extends StatefulWidget {
   final Duration animationDuration;
   final VoidCallback? onToolTipClick;
   final VoidCallback? onTargetClick;
+  final VoidCallback? onFinished;
   final bool? disposeOnTap;
   final bool disableAnimation;
   final EdgeInsets overlayPadding;
@@ -71,27 +72,20 @@ class Showcase extends StatefulWidget {
       this.textColor = Colors.black,
       this.showArrow = true,
       this.onTargetClick,
+      this.onFinished,
       this.disposeOnTap,
       this.animationDuration = const Duration(milliseconds: 2000),
       this.disableAnimation = false,
-      this.contentPadding =
-          const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      this.contentPadding = const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       this.onToolTipClick,
       this.overlayPadding = EdgeInsets.zero})
       : height = null,
         width = null,
         container = null,
-        assert(overlayOpacity >= 0.0 && overlayOpacity <= 1.0,
-            "overlay opacity should be >= 0.0 and <= 1.0."),
-        assert(
-            onTargetClick == null
-                ? true
-                : (disposeOnTap == null ? false : true),
+        assert(overlayOpacity >= 0.0 && overlayOpacity <= 1.0, "overlay opacity should be >= 0.0 and <= 1.0."),
+        assert(onTargetClick == null ? true : (disposeOnTap == null ? false : true),
             "disposeOnTap is required if you're using onTargetClick"),
-        assert(
-            disposeOnTap == null
-                ? true
-                : (onTargetClick == null ? false : true),
+        assert(disposeOnTap == null ? true : (onTargetClick == null ? false : true),
             "onTargetClick is required if you're using disposeOnTap");
 
   const Showcase.withWidget({
@@ -110,6 +104,7 @@ class Showcase extends StatefulWidget {
     this.showcaseBackgroundColor = Colors.white,
     this.textColor = Colors.black,
     this.onTargetClick,
+    this.onFinished,
     this.disposeOnTap,
     this.animationDuration = const Duration(milliseconds: 2000),
     this.disableAnimation = false,
@@ -117,8 +112,7 @@ class Showcase extends StatefulWidget {
     this.overlayPadding = EdgeInsets.zero,
   })  : showArrow = false,
         onToolTipClick = null,
-        assert(overlayOpacity >= 0.0 && overlayOpacity <= 1.0,
-            "overlay opacity should be >= 0.0 and <= 1.0.");
+        assert(overlayOpacity >= 0.0 && overlayOpacity <= 1.0, "overlay opacity should be >= 0.0 and <= 1.0.");
 
   @override
   _ShowcaseState createState() => _ShowcaseState();
@@ -185,10 +179,7 @@ class _ShowcaseState extends State<Showcase> with TickerProviderStateMixin {
     if (activeStep == widget.key) {
       _slideAnimationController.forward();
       if (ShowCaseWidget.of(context)!.autoPlay) {
-        timer = Timer(
-            Duration(
-                seconds: ShowCaseWidget.of(context)!.autoPlayDelay.inSeconds),
-            _nextIfAny);
+        timer = Timer(Duration(seconds: ShowCaseWidget.of(context)!.autoPlayDelay.inSeconds), _nextIfAny);
       }
     }
   }
@@ -212,6 +203,7 @@ class _ShowcaseState extends State<Showcase> with TickerProviderStateMixin {
   }
 
   void _nextIfAny() {
+    widget.onFinished?.call();
     if (timer != null && timer!.isActive) {
       if (ShowCaseWidget.of(context)!.autoPlayLockEnable) {
         return;
